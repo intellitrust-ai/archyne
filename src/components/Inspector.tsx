@@ -68,6 +68,21 @@ function attrToLine(a: EntityAttr): string {
 }
 
 /** Set or replace one `key:value` declaration in a style list. */
+/**
+ * The annotations typed into a class's field, one per word.
+ *
+ * Split on whitespace — it once split on the letter `s` (`/s+/`, the backslash
+ * lost), so `interfaceBlock` came back as `interface` and `Block`. Brackets a
+ * user types out of habit are taken off: the serializer writes `<<…>>` itself,
+ * and `<<block>>` would otherwise be written back as `<<<<block>>>>`.
+ */
+function parseAnnotations(text: string): string[] {
+  return text
+    .split(/\s+/)
+    .map((a) => a.replace(/^(<<|«)+|(>>|»)+$/g, ""))
+    .filter(Boolean);
+}
+
 function withStyle(styles: string[] | undefined, key: string, value: string): string[] {
   const rest = (styles ?? []).filter((s) => !s.trim().startsWith(`${key}:`));
   return [...rest, `${key}:${value}`];
@@ -539,7 +554,7 @@ function NodeFields({ node }: { node: AnyNode }) {
               defaultValue={(node.data.annotations ?? []).join(" ")}
               onBlur={(e) =>
                 updateNodeData(node.id, {
-                  annotations: e.target.value.split(/s+/).filter(Boolean),
+                  annotations: parseAnnotations(e.target.value),
                 })
               }
             />

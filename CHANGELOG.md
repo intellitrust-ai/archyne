@@ -53,6 +53,15 @@ CSS class names and internal store shape are _not_ public API.
   installers stay unsigned until the application is accepted, and the
   policy says so.
 
+### Fixed
+
+- **A class's annotations are split into words again.** The inspector's
+  annotations field split what was typed on the letter "s" rather than on
+  spaces, so `interfaceBlock` became `interface` and `Block`, and
+  `constraintBlock` was cut in three. It splits on whitespace now, and takes
+  off any `<<…>>` or `«…»` typed around a name, which used to be written back
+  doubled.
+
 ## [1.3.0-alpha.1] — 2026-10-26
 
 ### Changed
