@@ -4784,6 +4784,9 @@ body.resizing-side {
 .doc-kind.k-c4 {
   background: #9aa5b1;
 }
+.doc-kind.k-requirement {
+  background: #e8956a;
+}
 
 /* The import preview: the same two-column body as the export dialog, with
    the summary on the left and the converted diagram on the right. */

@@ -28,6 +28,22 @@ CSS class names and internal store shape are _not_ public API.
 
 ### Added
 
+- **SysML requirement diagrams.** `requirementDiagram` — the one part of
+  SysML that Mermaid draws natively — is now an editable family like the UML
+  ones, where it used to open read-only. Requirements of all six kinds and the
+  elements that answer them come from the palette; the inspector edits a
+  requirement's id, text, risk and verification method, an element's type and
+  document reference, and which of the seven relationships a connection is.
+  The relationship is drawn on the line in guillemets, dashed with an open
+  head, and containment as a solid line with a crosshair at the container. In
+  this syntax a requirement's name is its identifier, so renaming one renames
+  every relationship that points at it, and a name another requirement already
+  has is refused rather than silently merging the two. Exported SVG draws them
+  too.
+- **Four SysML templates**, all of one small drone so that they read as one
+  model: its requirements, a block definition diagram (a class diagram of
+  «block»s with parts, values and ports), a state machine of its operating
+  modes, and the activity of a mission.
 - **A code signing policy.** [CODE_SIGNING.md](CODE_SIGNING.md) says what
   will be signed (the Windows installer, built by the release workflow and
   nothing else), who approves each signing, and what Archyne sends over the

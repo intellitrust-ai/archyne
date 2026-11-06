@@ -17,8 +17,8 @@
  *
  * ## What it does not do yet
  *
- * Every family Archyne edits: flowchart, state, ER, class, C4, architecture and
- * sequence. A kind it does not know is refused rather than half-drawn — see
+ * Every family Archyne edits: flowchart, state, ER, class, C4, architecture,
+ * sequence and requirement. A kind it does not know is refused rather than half-drawn — see
  * `SUPPORTED`.
  *
  * Labels are real `<text>`, wrapped and positioned here from measured widths
@@ -29,7 +29,7 @@
  * most PDF pipelines all drop it, leaving boxes with no words in them.
  */
 import { labelLines } from "../model/label";
-import { IMG_SIZE, labelSize } from "../model/types";
+import { IMG_SIZE, labelSize, requirementRows } from "../model/types";
 import { styleProps } from "../model/nodeStyle";
 import {
   C4_TAGS,
@@ -79,7 +79,7 @@ import { pointsAttr, shapeGeometry } from "./shapes";
 /**
  * The families that have a drawing here.
  *
- * All seven. The two that arrived last did so for reasons rather than for want
+ * All eight. The two before the requirement family did so for reasons rather than for want
  * of typing, and both are settled: an architecture service is an icon, and
  * icons now come in resolved through `RenderOptions.icons` so the emitter stays
  * pure and sync; a sequence diagram is not routed at all, and has its own
@@ -96,6 +96,7 @@ const SUPPORTED = new Set<DiagramKind>([
   "class",
   "c4",
   "architecture",
+  "requirement",
 ]);
 
 /** Whether this family has a drawing here, for callers deciding a route. */
@@ -721,6 +722,29 @@ function nodeInner(
           })),
         );
       return tableMarkup(w, h, title, groups, paint);
+    }
+    case "requirement": {
+      // Drawn as a class is: the kind in guillemets over the name, then one
+      // row per field — `RequirementNodeView`'s layout, which `measureNode`
+      // measured with the same helpers.
+      const heading = labelFace(custom, FONTS.tableTitle);
+      const row = labelFace(custom, FONTS.table);
+      const title: TextBlock[] = [
+        {
+          text: `«${node.data.reqType}»`,
+          font: FONTS.annotation,
+          align: "middle" as const,
+          attrs: ' opacity="0.7"',
+        },
+        { text: node.data.label, font: heading.font, align: "middle", attrs: heading.attrs },
+      ];
+      const rows = requirementRows(node.data).map(([k, v]) => ({
+        text: `${k}: ${v}`,
+        font: row.font,
+        align: "start" as const,
+        attrs: row.attrs,
+      }));
+      return tableMarkup(w, h, title, rows.length ? [rows] : [], paint);
     }
     case "participant": {
       // The head only. Its lifeline belongs to the diagram rather than to the
