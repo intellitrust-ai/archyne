@@ -409,7 +409,7 @@ read-only, rendered rather than refused.
   points at it. The rest of SysML is written in the families above, and four
   templates show how: a block definition diagram as a class diagram of
   «block»s, a state machine, and an activity, beside a requirements model of
-  the same system.
+  the same system. See [`docs/sysml.md`](docs/sysml.md).
 
 The palette, inspector, and "New…" menu adapt to the active diagram kind.
 Plus: **undo/redo** (Ctrl+Z/Y — the code being the source of truth makes
