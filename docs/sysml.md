@@ -64,7 +64,8 @@ requirement — carries a type and a document reference. Every field is
 optional, and one left empty is not written to the file at all.
 
 On the canvas a node is drawn as SysML draws it: the kind in guillemets over
-the name, then one `Label: value` row per field it has — `Id`, `Text`, `Risk`,
+the name, then one `Label: value` row per field it has, the label in a
+muted colour so the value reads first — `Id`, `Text`, `Risk`,
 `Verification` for a requirement, `Type`, `Doc ref` for an element. Those row
 labels stay in English in every locale: they are SysML's vocabulary and the
 words Mermaid itself draws, and an exported picture should not change its

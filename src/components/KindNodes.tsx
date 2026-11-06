@@ -188,7 +188,11 @@ export function RequirementNodeView({ id, data, selected }: NodeProps<Requiremen
         <div className="table-rows">
           {rows.map(([k, v]) => (
             <div key={k} className="table-row">
-              {k}: {v}
+              {/* One flex child, not two: a second would add the row's gap
+                  and the line would no longer be the width measured for it. */}
+              <span>
+                <span className="req-key">{k}:</span> {v}
+              </span>
             </div>
           ))}
         </div>

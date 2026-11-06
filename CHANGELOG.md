@@ -38,8 +38,9 @@ CSS class names and internal store shape are _not_ public API.
   head, and containment as a solid line with a crosshair at the container. In
   this syntax a requirement's name is its identifier, so renaming one renames
   every relationship that points at it, and a name another requirement already
-  has is refused rather than silently merging the two. Exported SVG draws them
-  too.
+  has is refused rather than silently merging the two. Each field is a
+  `Label: value` row with the label set back in a muted colour, so the value
+  reads first. Exported SVG draws them too.
 - **Four SysML templates**, all of one small drone so that they read as one
   model: its requirements, a block definition diagram (a class diagram of
   «block»s with parts, values and ports), a state machine of its operating

@@ -293,6 +293,11 @@ interface TextBlock {
   align: "start" | "middle";
   /** Extra attributes, for the odd line that is bold or dimmed. */
   attrs?: string;
+  /**
+   * A leading run of `text` drawn dimmed — a requirement row's `Id:` — so
+   * the value after it reads first. Same font, so the line measures the same.
+   */
+  dimPrefix?: string;
 }
 
 /**
@@ -313,19 +318,33 @@ function textStack(
   },
 ): string {
   const metrics = opts.metrics ?? textMetrics();
-  type Line = { text: string; font: FontSpec; attrs: string; h: number; ascent: number };
+  type Line = {
+    text: string;
+    font: FontSpec;
+    attrs: string;
+    h: number;
+    ascent: number;
+    dim?: string;
+  };
   const lines: Line[] = [];
 
   for (const block of blocks) {
+    let first = true;
     for (const raw of labelLines(block.text)) {
       for (const line of wrapText(raw, block.font, opts.width, metrics)) {
         const size = metrics.measure(line, block.font);
+        const dim =
+          first && block.dimPrefix && line.startsWith(block.dimPrefix)
+            ? block.dimPrefix
+            : undefined;
+        first = false;
         lines.push({
           text: line,
           font: block.font,
           attrs: block.attrs ?? "",
           h: size.height,
           ascent: size.ascent,
+          ...(dim ? { dim } : {}),
         });
       }
     }
@@ -346,9 +365,15 @@ function textStack(
       const baseline = y + l.ascent;
       y += l.h;
       const weight = l.font.weight ? ` font-weight="${l.font.weight}"` : "";
+      // The dimmed run is a tspan inside the line's own, so it inherits the
+      // line's font and fill and only takes the opacity the «stereotype»
+      // above it is drawn with.
+      const body = l.dim
+        ? `<tspan opacity="0.7">${esc(l.dim)}</tspan>${esc(l.text.slice(l.dim.length))}`
+        : esc(l.text);
       return (
         `<tspan x="${n(x)}" y="${n(baseline)}" font-size="${n(l.font.size)}"` +
-        ` font-family="${esc(l.font.family)}"${weight}${l.attrs}>${esc(l.text)}</tspan>`
+        ` font-family="${esc(l.font.family)}"${weight}${l.attrs}>${body}</tspan>`
       );
     })
     .join("");
@@ -740,6 +765,7 @@ function nodeInner(
       ];
       const rows = requirementRows(node.data).map(([k, v]) => ({
         text: `${k}: ${v}`,
+        dimPrefix: `${k}:`,
         font: row.font,
         align: "start" as const,
         attrs: row.attrs,
