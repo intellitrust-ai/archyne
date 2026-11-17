@@ -54,6 +54,13 @@ CSS class names and internal store shape are _not_ public API.
   `constraintBlock` was cut in three. It splits on whitespace now, and takes
   off any `<<…>>` or `«…»` typed around a name, which used to be written back
   doubled.
+- **Embedded, the sample diagram could replace the host's document.** On a
+  fast start (Archyne already in the browser cache) the host's `load` landed
+  before the sample diagram finished laying out, and the sample then drew over
+  it and went back to the host as a `change` — a host that saves every change
+  wrote it into its file. Overlapping loads now keep the last one asked for,
+  and the bridge sends `change` only for edits made after the host's first
+  `load`, never the loaded text itself.
 
 ## [1.4.1-alpha.1] — 2026-11-19
 

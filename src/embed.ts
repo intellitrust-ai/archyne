@@ -11,7 +11,9 @@ import { vscodeApi } from "./host";
  *                    { type: "export", options? }    render an export
  *   archyne → host : { type: "ready" }               bridge is listening
  *                    { type: "loaded" }              load completed
- *                    { type: "change", code }        user edited (debounced)
+ *                    { type: "change", code }        user edited (debounced);
+ *                                                    only after the first load,
+ *                                                    never the loaded text itself
  *                    { type: "code",   code }        reply to getCode
  *                    { type: "exported", format, dataUrl }
  *                    { type: "error",  message }
@@ -141,6 +143,15 @@ export function initEmbedBridge(): void {
   if (!host) return;
   const post = host.post;
 
+  // `change` means the user edited the host's document. Before the first
+  // `load` the canvas holds Archyne's own starting diagram, and while a load
+  // is applying the new code is the host's own text: neither is an edit, and
+  // a host that saves every `change` would write them into its file.
+  let hostLoaded = false;
+  let loading = 0;
+  let last = useGraphStore.getState().code;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
   window.addEventListener("message", (e: MessageEvent) => {
     if (!host.accepts(e)) return;
     const msg = e.data as { type?: unknown; code?: unknown; options?: unknown };
@@ -150,7 +161,16 @@ export function initEmbedBridge(): void {
       try {
         switch (msg.type) {
           case "load":
-            await s.applyCode(String(msg.code ?? ""), { record: true });
+            loading++;
+            try {
+              await s.applyCode(String(msg.code ?? ""), { record: true });
+            } finally {
+              loading--;
+            }
+            // Whatever was pending belongs to the document just replaced.
+            clearTimeout(timer);
+            last = useGraphStore.getState().code;
+            hostLoaded = true;
             post({ type: "loaded" });
             break;
           case "getCode":
@@ -177,11 +197,10 @@ export function initEmbedBridge(): void {
   });
 
   // Push edits to the host, debounced.
-  let last = useGraphStore.getState().code;
-  let timer: ReturnType<typeof setTimeout> | undefined;
   useGraphStore.subscribe((state) => {
     if (state.code === last) return;
     last = state.code;
+    if (!hostLoaded || loading > 0) return;
     clearTimeout(timer);
     timer = setTimeout(() => post({ type: "change", code: last }), 300);
   });
