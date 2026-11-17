@@ -24,6 +24,18 @@ itself ships, the following count as the public API for semver purposes:
 Breaking any of those requires a major version. The React component structure,
 CSS class names and internal store shape are _not_ public API.
 
+## [Unreleased]
+
+### Fixed
+
+- **Embedded, the sample diagram could replace the host's document.** On a
+  fast start (Archyne already in the browser cache) the host's `load` landed
+  before the sample diagram finished laying out, and the sample then drew over
+  it and went back to the host as a `change` — a host that saves every change
+  wrote it into its file. Overlapping loads now keep the last one asked for,
+  and the bridge sends `change` only for edits made after the host's first
+  `load`, never the loaded text itself.
+
 ## [1.5.0-alpha.1] — 2026-11-20
 
 ### Added

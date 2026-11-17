@@ -729,3 +729,20 @@ describe("requirement diagrams (SysML)", () => {
     expect(useGraphStore.getState().code).toContain("requirement brake_2 {");
   });
 });
+
+describe("overlapping loads", () => {
+  it("keeps the last document asked for, not the last to finish", async () => {
+    // The first needs an auto-layout; the second carries its positions and
+    // skips it, so it finishes first. Embedded, the first was the sample
+    // diagram and the second the host's document.
+    const laidOut = 'flowchart TD\n  s["Sample"] --> t["Diagram"]\n';
+    const placed =
+      'flowchart TD\n  h["Host"] --> d["Document"]\n%% graph:positions {"h":{"x":0,"y":0},"d":{"x":0,"y":120}}\n';
+    const first = useGraphStore.getState().applyCode(laidOut);
+    const second = useGraphStore.getState().applyCode(placed);
+    await Promise.all([first, second]);
+    const s = useGraphStore.getState();
+    expect(s.code).toBe(placed);
+    expect(s.nodes.map((n) => n.id).sort()).toEqual(["d", "h"]);
+  });
+});
