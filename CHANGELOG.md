@@ -26,7 +26,12 @@ CSS class names and internal store shape are _not_ public API.
 
 ## [Unreleased]
 
-### Fixed
+## [1.3.0-alpha.1.intellitrust.2] — 2026-11-18
+
+A release of the `intellitrust-ai/archyne` fork: 1.3.0-alpha.1.intellitrust.1
+plus the change below. Its packages are attached to the fork's GitHub release.
+
+### Fixed in the fork
 
 - **Embedded, Archyne opens no diagram of its own.** The sample diagram was
   still drawn in an iframe until the host's `load` arrived, as only the VS Code
