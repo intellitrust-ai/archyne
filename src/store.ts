@@ -255,6 +255,9 @@ export function sizableSelection(nodes: AnyNode[]): AnyNode[] {
   return pick.length >= 2 ? pick : [];
 }
 
+/** Counts `applyCode` calls, so a slow one can tell it has been overtaken. */
+let applyGeneration = 0;
+
 export const SAMPLE = `flowchart TD
   start(["Start"])
   input[/"User request"/]
@@ -1040,6 +1043,13 @@ export const useGraphStore = create<GraphState>((set, get) => {
     },
 
     applyCode: async (code, opts) => {
+      // The last call wins, not the last to finish. Parsing and layout are
+      // async, and a document with stored positions skips the layout: started
+      // after one without, it finishes first, and the older one would then
+      // land on top of it. Embedded, that was the sample diagram arriving over
+      // the host's freshly loaded document — and being sent back as an edit.
+      const generation = ++applyGeneration;
+      const stale = () => generation !== applyGeneration;
       if (opts?.record) record(get().code);
       // This is a replacement only when it is not a re-parse of a half-typed
       // line. A fresh document has not been rearranged, whatever the previous
@@ -1047,10 +1057,12 @@ export const useGraphStore = create<GraphState>((set, get) => {
       if (!opts?.editing) set({ lastArranged: null });
       try {
         const parsed = await parseDiagram(code);
+        if (stale()) return;
         let positions = opts?.forceLayout ? null : readPositions(code);
         let nodes = placeNodes(parsed.nodes, positions ?? {}, parsed.kind);
         if (!positions && parsed.kind !== "sequence") {
           positions = (await autoLayout(nodes, parsed.edges, parsed.direction)).positions;
+          if (stale()) return;
           nodes = placeNodes(parsed.nodes, positions, parsed.kind);
         }
         // Carry the selection across the re-parse.
@@ -1106,6 +1118,7 @@ export const useGraphStore = create<GraphState>((set, get) => {
         });
         persist(code);
       } catch (err) {
+        if (stale()) return;
         if (err instanceof UnsupportedDiagramError) {
           // Not an error from the user's point of view: the file is fine, we
           // just can't offer visual editing for it. Drop the stale graph so

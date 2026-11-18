@@ -11,7 +11,9 @@ import { vscodeApi } from "./host";
  *                    { type: "export", options? }    render an export
  *   archyne → host : { type: "ready" }               bridge is listening
  *                    { type: "loaded" }              load completed
- *                    { type: "change", code }        user edited (debounced)
+ *                    { type: "change", code }        user edited (debounced);
+ *                                                    only after the first load,
+ *                                                    never the loaded text itself
  *                    { type: "code",   code }        reply to getCode
  *                    { type: "exported", format, dataUrl }
  *                    { type: "error",  message }
@@ -141,6 +143,18 @@ export function initEmbedBridge(): void {
   if (!host) return;
   const post = host.post;
 
+  // `change` means the user edited the host's document. Before the first
+  // `load` the canvas holds Archyne's own starting diagram, and while a load
+  // is applying the new code is the host's own text: neither is an edit, and
+  // a host that saves every `change` would write them into its file.
+  let hostLoaded = false;
+  let loading = false;
+  // Only the latest `load` may end the loading state: an older one finishing
+  // after it would otherwise mute or swallow edits to the newer document.
+  let loadToken = 0;
+  let last = useGraphStore.getState().code;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+
   window.addEventListener("message", (e: MessageEvent) => {
     if (!host.accepts(e)) return;
     const msg = e.data as { type?: unknown; code?: unknown; options?: unknown };
@@ -149,10 +163,26 @@ export function initEmbedBridge(): void {
     void (async () => {
       try {
         switch (msg.type) {
-          case "load":
-            await s.applyCode(String(msg.code ?? ""), { record: true });
+          case "load": {
+            const token = ++loadToken;
+            loading = true;
+            // Whatever was pending belongs to the document being replaced.
+            // Cleared now, not after the load: a slow layout would let it
+            // fire mid-load and send the old text over the host's new one.
+            clearTimeout(timer);
+            try {
+              await s.applyCode(String(msg.code ?? ""), { record: true });
+            } finally {
+              if (token === loadToken) loading = false;
+            }
+            if (token === loadToken) {
+              last = useGraphStore.getState().code;
+              hostLoaded = true;
+            }
+            // Every load is answered, even one a newer load overtook.
             post({ type: "loaded" });
             break;
+          }
           case "getCode":
             post({ type: "code", code: s.code });
             break;
@@ -177,11 +207,10 @@ export function initEmbedBridge(): void {
   });
 
   // Push edits to the host, debounced.
-  let last = useGraphStore.getState().code;
-  let timer: ReturnType<typeof setTimeout> | undefined;
   useGraphStore.subscribe((state) => {
     if (state.code === last) return;
     last = state.code;
+    if (!hostLoaded || loading) return;
     clearTimeout(timer);
     timer = setTimeout(() => post({ type: "change", code: last }), 300);
   });
