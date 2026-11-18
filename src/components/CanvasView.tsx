@@ -30,6 +30,7 @@ import { SequenceOverlay } from "./SequenceOverlay";
 import { useKeyboardConnect } from "./useKeyboardConnect";
 import { useDragGuides } from "./useDragGuides";
 import { useCoarsePointer } from "./useMediaQuery";
+import { embedDragPans } from "../host";
 import { GuideLines } from "./GuideLines";
 import { GRID } from "../guides";
 import { MermaidPreview } from "./MermaidPreview";
@@ -174,6 +175,9 @@ export function CanvasView() {
   const [connecting, setConnecting] = useState(false);
   const dragGuides = useDragGuides();
   const coarse = useCoarsePointer();
+  // A touchscreen, or a host that asked for it (`&pan=drag`): a plain drag
+  // on the empty canvas pans, and Shift + drag still draws the rectangle.
+  const dragPans = coarse || embedDragPans();
   const unsupported = useGraphStore((s) => s.unsupported);
   const parseError = useGraphStore((s) => s.parseError);
   const code = useGraphStore((s) => s.code);
@@ -347,9 +351,9 @@ export function CanvasView() {
            right button. A touchscreen has neither of those buttons, so there
            the same gesture has to pan — otherwise a finger only ever draws a
            marquee and the diagram cannot be moved at all. */
-        selectionOnDrag={!coarse}
+        selectionOnDrag={!dragPans}
         selectionMode={SelectionMode.Partial}
-        panOnDrag={coarse ? true : [1, 2]}
+        panOnDrag={dragPans ? true : [1, 2]}
         onMove={() => (panMovedRef.current = true)}
         connectionMode={ConnectionMode.Loose}
         connectionRadius={38}

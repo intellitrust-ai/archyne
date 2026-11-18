@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vitest";
 import { ANY_ORIGIN, parseAllowedOrigins } from "./embed";
 
 describe("embed origin allowlist", () => {
@@ -52,5 +52,23 @@ describe("embed origin allowlist", () => {
     const result = parseAllowedOrigins("?embed=1&origin=nonsense");
     expect(result).not.toBe(ANY_ORIGIN);
     expect(result).toBeNull();
+  });
+});
+
+describe("embed drag-to-pan option", () => {
+  const at = (search: string) => history.replaceState(null, "", `/${search}`);
+  afterEach(() => at(""));
+
+  it("is asked for with `pan=drag`, and only when embedded", async () => {
+    const { embedDragPans } = await import("./embed");
+    at("?embed=1&origin=https://app.example&pan=drag");
+    expect(embedDragPans()).toBe(true);
+    // The standalone app keeps its own gestures whatever the URL says.
+    at("?pan=drag");
+    expect(embedDragPans()).toBe(false);
+    at("?embed=1&origin=https://app.example");
+    expect(embedDragPans()).toBe(false);
+    at("?embed=1&origin=https://app.example&pan=other");
+    expect(embedDragPans()).toBe(false);
   });
 });
