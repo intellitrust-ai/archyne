@@ -14,7 +14,8 @@ import { vscodeApi } from "./host";
  *                    { type: "change", code }        user edited (debounced);
  *                                                    only after the first load,
  *                                                    never the loaded text itself
- *                    { type: "code",   code }        reply to getCode
+ *                    { type: "code",   code }        reply to getCode; no
+ *                                                    `code` before the first load
  *                    { type: "exported", format, dataUrl }
  *                    { type: "error",  message }
  *
@@ -187,7 +188,10 @@ export function initEmbedBridge(): void {
             break;
           }
           case "getCode":
-            post({ type: "code", code: s.code });
+            // Before the first load there is no document of the host's to
+            // report — the canvas is empty — and a host that saves the reply
+            // would write an empty diagram over its file.
+            post(hostLoaded ? { type: "code", code: s.code } : { type: "code" });
             break;
           case "export": {
             const opts = {

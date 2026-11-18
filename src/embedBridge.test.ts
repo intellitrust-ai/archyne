@@ -88,6 +88,22 @@ describe("embed bridge, overlapping and slow loads", () => {
     sent.length = 0;
   });
 
+  it("answers `getCode` without code until the host's first load", async () => {
+    // Before the load the canvas is empty: a host saving the reply would
+    // write an empty diagram over its file.
+    send({ type: "getCode" });
+    await vi.waitFor(() => expect(types()).toContain("code"));
+    expect(sent.find((m) => m.type === "code")).toEqual({ type: "code" });
+
+    const doc = "flowchart TD\n  h --> d\n";
+    send({ type: "load", code: doc });
+    await vi.waitFor(() => expect(types()).toContain("loaded"));
+    sent.length = 0;
+    send({ type: "getCode" });
+    await vi.waitFor(() => expect(types()).toContain("code"));
+    expect(sent.find((m) => m.type === "code")).toEqual({ type: "code", code: doc });
+  });
+
   it("drops an edit still pending when a load starts, even if the load is slow", async () => {
     const pending = slowLoads();
     send({ type: "load", code: "flowchart TD\n  a --> b\n" });

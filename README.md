@@ -296,16 +296,17 @@ any parent frame and is for local development only.
     if (e.data.type === "exported") show(e.data.dataUrl); // png/svg data URL
   });
   // on demand:
-  mf.postMessage({ type: "getCode" }, MF); // → { type:"code", code }
+  mf.postMessage({ type: "getCode" }, MF); // → { type:"code", code }, no code before the first load
   // format: "png" | "svg" | "pdf"
   mf.postMessage({ type: "export", options: { format: "png", background: "light" } }, MF);
 </script>
 ```
 
 Messages from the editor: `ready`, `loaded`, `change {code}`, `code {code}`,
-`exported {format, dataUrl}`, `error {message}`. `change` is sent only for
-edits made after the host's first `load`. A working example ships at
-`/embed-demo.html`.
+`exported {format, dataUrl}`, `error {message}`. Embedded, Archyne opens no
+diagram of its own: the canvas waits for the host's first `load`. Until then
+`code` carries no `code`, and `change` is sent only for edits made after it.
+A working example ships at `/embed-demo.html`.
 
 Add `&pan=drag` to make a drag on the empty canvas pan the view, as most
 canvases in host apps do; the selection rectangle is then Shift + drag.

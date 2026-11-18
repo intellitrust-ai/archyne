@@ -26,6 +26,15 @@ CSS class names and internal store shape are _not_ public API.
 
 ## [Unreleased]
 
+### Fixed
+
+- **Embedded, Archyne opens no diagram of its own.** The sample diagram was
+  still drawn in an iframe until the host's `load` arrived, as only the VS Code
+  webview skipped it; a host leaving the editor in that moment read it back
+  with `getCode` as if it were its document. The canvas now waits for the
+  host's document, as in VS Code, and `getCode` answers without `code` until
+  the first `load`. The embed demo sends its diagram on `ready`.
+
 ## [1.3.0-alpha.1.intellitrust.1] — 2026-11-18
 
 A release of the `intellitrust-ai/archyne` fork, not of the upstream project:
