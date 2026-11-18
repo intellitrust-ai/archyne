@@ -26,7 +26,24 @@ CSS class names and internal store shape are _not_ public API.
 
 ## [Unreleased]
 
-### Added
+## [1.3.0-alpha.1.intellitrust.1] — 2026-11-18
+
+A release of the `intellitrust-ai/archyne` fork, not of the upstream project:
+upstream `main` after 1.3.0-alpha.1, plus the fork's own changes. Its packages
+are attached to the fork's GitHub release rather than published to npm.
+
+### From upstream, since 1.3.0-alpha.1
+
+- **A code signing policy.** [CODE_SIGNING.md](CODE_SIGNING.md) says what
+  will be signed (the Windows installer, built by the release workflow and
+  nothing else), who approves each signing, and what Archyne sends over the
+  network. Archyne has applied to SignPath Foundation for a free certificate,
+  which asks for the policy on the home page and the download page: the
+  README, the About dialog and every release page now link to it. The
+  installers stay unsigned until the application is accepted, and the
+  policy says so.
+
+### Added in the fork
 
 - **Drag-to-pan when embedded.** A host that adds `&pan=drag` to the embed URL
   gets the gesture its own canvases have: dragging the empty canvas moves the
@@ -49,16 +66,8 @@ CSS class names and internal store shape are _not_ public API.
   model: its requirements, a block definition diagram (a class diagram of
   «block»s with parts, values and ports), a state machine of its operating
   modes, and the activity of a mission.
-- **A code signing policy.** [CODE_SIGNING.md](CODE_SIGNING.md) says what
-  will be signed (the Windows installer, built by the release workflow and
-  nothing else), who approves each signing, and what Archyne sends over the
-  network. Archyne has applied to SignPath Foundation for a free certificate,
-  which asks for the policy on the home page and the download page: the
-  README, the About dialog and every release page now link to it. The
-  installers stay unsigned until the application is accepted, and the
-  policy says so.
 
-### Fixed
+### Fixed in the fork
 
 - **Embedded, the sample diagram could replace the host's document.** On a
   fast start (Archyne already in the browser cache) the host's `load` landed
