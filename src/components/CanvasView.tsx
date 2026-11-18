@@ -31,6 +31,7 @@ import { SequenceOverlay } from "./SequenceOverlay";
 import { useKeyboardConnect } from "./useKeyboardConnect";
 import { useDragGuides } from "./useDragGuides";
 import { useCoarsePointer } from "./useMediaQuery";
+import { embedDragPans } from "../host";
 import { GuideLines } from "./GuideLines";
 import { GRID } from "../guides";
 import { MermaidPreview } from "./MermaidPreview";
@@ -185,6 +186,9 @@ export function CanvasView() {
   const setTool = useCanvasTool((s) => s.setTool);
   /** The end of a connection being moved shows every connection point too. */
   const reconnecting = useGraphStore((s) => s.reconnecting);
+  // A touchscreen, or a host that asked for it (`&pan=drag`): a plain drag
+  // on the empty canvas pans, and Shift + drag still draws the rectangle.
+  const dragPans = coarse || embedDragPans();
   const unsupported = useGraphStore((s) => s.unsupported);
   const parseError = useGraphStore((s) => s.parseError);
   const code = useGraphStore((s) => s.code);
@@ -362,13 +366,13 @@ export function CanvasView() {
            right button. A touchscreen has neither of those buttons, so there
            the same gesture has to pan — otherwise a finger only ever draws a
            marquee and the diagram cannot be moved at all. */
-        selectionOnDrag={!coarse && !panning}
+        selectionOnDrag={!dragPans && !panning}
         selectionMode={SelectionMode.Partial}
         /* With the hand (H, or Space held) a left drag pans as well, from
            anywhere: the boxes and lines under it are made inert in the
            stylesheet, so the press reaches the canvas behind them. Space is
            ours, not React Flow's, so that it works the same as the button. */
-        panOnDrag={coarse || panning ? true : [1, 2]}
+        panOnDrag={dragPans || panning ? true : [1, 2]}
         panActivationKeyCode={null}
         onMove={() => (panMovedRef.current = true)}
         connectionMode={ConnectionMode.Loose}

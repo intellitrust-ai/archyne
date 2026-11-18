@@ -28,6 +28,10 @@ CSS class names and internal store shape are _not_ public API.
 
 ### Added
 
+- **Drag-to-pan when embedded.** A host that adds `&pan=drag` to the embed URL
+  gets the gesture its own canvases have: dragging the empty canvas moves the
+  view, and the selection rectangle is Shift + drag. The default is unchanged.
+
 - **SysML requirement diagrams.** `requirementDiagram` — the one part of
   SysML that Mermaid draws natively — is now an editable family like the UML
   ones, where it used to open read-only. Requirements of all six kinds and the
