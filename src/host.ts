@@ -54,6 +54,21 @@ export function isEmbedded(): boolean {
 }
 
 /**
+ * True when an embedding page asked for `&pan=drag`: dragging the empty canvas
+ * moves the view, as in the host's own canvases, and the selection rectangle
+ * moves to Shift + drag. Without it a drag draws the rectangle and the view
+ * pans with the middle or right button, or with Space held.
+ */
+export function embedDragPans(): boolean {
+  if (!isEmbedded()) return false;
+  try {
+    return new URLSearchParams(location.search).get("pan") === "drag";
+  } catch {
+    return false;
+  }
+}
+
+/**
  * True when the document belongs to the host, not to Archyne.
  *
  * In a VS Code webview the file is a `TextDocument` the editor owns: it holds

@@ -303,8 +303,14 @@ any parent frame and is for local development only.
 ```
 
 Messages from the editor: `ready`, `loaded`, `change {code}`, `code {code}`,
-`exported {format, dataUrl}`, `error {message}`. A working example ships at
+`exported {format, dataUrl}`, `error {message}`. `change` is sent only for
+edits made after the host's first `load`. A working example ships at
 `/embed-demo.html`.
+
+Add `&pan=drag` to make a drag on the empty canvas pan the view, as most
+canvases in host apps do; the selection rectangle is then Shift + drag.
+Without it a drag draws the rectangle, and the view pans with the middle or
+right button or with Space held.
 
 ## MCP server — let agents edit your diagrams
 
