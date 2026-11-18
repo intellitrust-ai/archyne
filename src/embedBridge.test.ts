@@ -49,3 +49,78 @@ describe("embed bridge `change`", () => {
     expect(changes()).toEqual([edited]);
   });
 });
+
+describe("embed bridge, overlapping and slow loads", () => {
+  // A fresh store and bridge per test, talking to a fresh parent: the bridges
+  // started by earlier tests listen to the old one and ignore these messages.
+  let store: typeof useGraphStore;
+  let host: { postMessage: (msg: Record<string, unknown>) => void };
+  const send = (data: unknown) =>
+    window.dispatchEvent(
+      new MessageEvent("message", { data, origin: ORIGIN, source: host as unknown as Window }),
+    );
+
+  /** Replace `applyCode` with one the test finishes by hand. */
+  function slowLoads() {
+    // `finish(false)` ends it as the real one ends an overtaken call: without
+    // touching the document.
+    const pending: Array<{ finish: (apply?: boolean) => void }> = [];
+    store.setState({
+      applyCode: (code: string) =>
+        new Promise<void>((resolve) => {
+          pending.push({
+            finish: (apply = true) => {
+              if (apply) store.setState({ code });
+              resolve();
+            },
+          });
+        }),
+    });
+    return pending;
+  }
+
+  beforeEach(async () => {
+    vi.resetModules();
+    host = { postMessage: (msg) => sent.push(msg) };
+    Object.defineProperty(window, "parent", { value: host, configurable: true });
+    store = (await import("./store")).useGraphStore;
+    (await import("./embed")).initEmbedBridge();
+    sent.length = 0;
+  });
+
+  it("drops an edit still pending when a load starts, even if the load is slow", async () => {
+    const pending = slowLoads();
+    send({ type: "load", code: "flowchart TD\n  a --> b\n" });
+    pending[0].finish();
+    await vi.waitFor(() => expect(types()).toContain("loaded"));
+
+    store.setState({ code: "flowchart TD\n  a --> edited\n" });
+    send({ type: "load", code: "flowchart TD\n  x --> y\n" });
+    // The debounce elapses while the second load is still laying out.
+    await vi.advanceTimersByTimeAsync(500);
+    expect(changes()).toEqual([]);
+
+    pending[1].finish();
+    await vi.waitFor(() => expect(types().filter((t) => t === "loaded")).toHaveLength(2));
+    await vi.advanceTimersByTimeAsync(500);
+    expect(changes()).toEqual([]);
+  });
+
+  it("sends edits to a load that overtook a slower one", async () => {
+    const pending = slowLoads();
+    send({ type: "load", code: "flowchart TD\n  slow --> a\n" });
+    send({ type: "load", code: "flowchart TD\n  fast --> b\n" });
+    await vi.waitFor(() => expect(pending).toHaveLength(2));
+
+    pending[1].finish();
+    await vi.waitFor(() => expect(types()).toContain("loaded"));
+    const edited = "flowchart TD\n  fast --> edited\n";
+    store.setState({ code: edited });
+
+    // The overtaken load finishing late must not swallow that edit.
+    pending[0].finish(false);
+    await vi.waitFor(() => expect(types().filter((t) => t === "loaded")).toHaveLength(2));
+    await vi.advanceTimersByTimeAsync(500);
+    expect(changes()).toEqual([edited]);
+  });
+});
