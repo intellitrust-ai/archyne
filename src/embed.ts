@@ -18,6 +18,9 @@ import { vscodeApi } from "./host";
  *                    { type: "exported", format, dataUrl }
  *                    { type: "error",  message }
  *
+ * `&pan=drag` makes a drag on the empty canvas pan the view, with the
+ * selection rectangle on Shift + drag (see `embedDragPans`).
+ *
  * The bridge is **default-deny**: the host must name itself with
  * `&origin=https://host.example` (comma-separate several). Diagram content is
  * only ever posted to an origin on that list. `origin=*` restores the old
@@ -41,7 +44,7 @@ interface Transport {
 // Re-exported so `embed.ts` stays the one place callers ask about embedding;
 // the answers live in a leaf module because `workspace.ts` needs them too and
 // cannot import this one without a cycle. See `host.ts`.
-export { hostOwnsFile, inWebview, isEmbedded } from "./host";
+export { embedDragPans, hostOwnsFile, inWebview, isEmbedded } from "./host";
 
 /** Wildcard sentinel — accept and reply to any origin. Development only. */
 export const ANY_ORIGIN = "*";

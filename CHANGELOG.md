@@ -26,6 +26,12 @@ CSS class names and internal store shape are _not_ public API.
 
 ## [Unreleased]
 
+### Added
+
+- **Drag-to-pan when embedded.** A host that adds `&pan=drag` to the embed URL
+  gets the gesture its own canvases have: dragging the empty canvas moves the
+  view, and the selection rectangle is Shift + drag. The default is unchanged.
+
 ### Fixed
 
 - **Embedded, the sample diagram could replace the host's document.** On a
