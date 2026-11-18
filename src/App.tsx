@@ -44,8 +44,10 @@ export default function App() {
     const initial = loadInitialCode();
     // A host sends the document it owns, a moment later. Drawing ours first
     // is a flash of a diagram the user did not open — so the splash stays up
-    // until the real one lands, which is what `booted` already means.
-    if (hostOwnsFile()) return;
+    // until the real one lands, which is what `booted` already means. That
+    // holds for an embedding page as much as for the VS Code webview: there
+    // the sample could even land after the host's document and replace it.
+    if (isEmbedded()) return;
     void applyCode(initial);
   }, [applyCode]);
 

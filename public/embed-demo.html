@@ -80,10 +80,13 @@
       window.addEventListener("message", (e) => {
         if (e.origin !== EDITOR) return;
         const msg = e.data || {};
-        if (msg.type === "ready")
+        // Embedded, the editor waits for the host's document: send it at once.
+        if (msg.type === "ready") {
           document.getElementById("status").textContent = "editor ready";
+          loadDiagram();
+        }
         if (msg.type === "change") log("change:\n" + msg.code);
-        if (msg.type === "code") log("code:\n" + msg.code);
+        if (msg.type === "code") log("code:\n" + (msg.code ?? "(nothing loaded yet)"));
         if (msg.type === "loaded") log("loaded ✓");
         if (msg.type === "exported") {
           const img = document.getElementById("shot");
@@ -94,7 +97,7 @@
         if (msg.type === "error") log("error: " + msg.message);
       });
 
-      document.getElementById("load").onclick = () =>
+      const loadDiagram = () =>
         mf.postMessage(
           {
             type: "load",
@@ -102,6 +105,7 @@
           },
           EDITOR,
         );
+      document.getElementById("load").onclick = loadDiagram;
       document.getElementById("get").onclick = () =>
         mf.postMessage({ type: "getCode" }, EDITOR);
       document.getElementById("png").onclick = () =>
