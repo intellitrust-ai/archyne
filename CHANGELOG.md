@@ -32,6 +32,15 @@ CSS class names and internal store shape are _not_ public API.
   gets the gesture its own canvases have: dragging the empty canvas moves the
   view, and the selection rectangle is Shift + drag. The default is unchanged.
 
+### Changed
+
+- **Embedded, Archyne follows the host's theme.** Without a saved theme choice
+  Archyne started dark, also inside a light host page. In an iframe
+  (`?embed=1`) it now starts from "system": there `prefers-color-scheme` is the
+  framing page's `color-scheme`, so the editor takes the host's theme, light or
+  dark, and changes with it. A saved choice still wins; outside an iframe, and
+  in the VS Code webview, the default stays dark.
+
 ### Fixed
 
 - **Embedded, the sample diagram could replace the host's document.** On a

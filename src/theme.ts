@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { setResolvedTheme } from "./edgeTheme";
+import { inWebview, isEmbedded } from "./host";
 
 export type ThemeChoice = "dark" | "light" | "system";
 type Resolved = "dark" | "light";
@@ -26,12 +27,25 @@ interface ThemeState {
   sync: () => void;
 }
 
+/**
+ * The theme to start from. A saved choice wins. Without one Archyne starts
+ * dark, except when a page embeds it in an iframe (`?embed=1`): there it starts
+ * from "system", because inside an iframe `prefers-color-scheme` answers with
+ * the framing page's `color-scheme`, not the OS's. "System" then follows the
+ * host's theme, light or dark, and changes with it while the editor is open.
+ * A VS Code webview keeps the old default.
+ */
+export function initialChoice(stored: string | null, framed: boolean): ThemeChoice {
+  if (stored === "light" || stored === "dark" || stored === "system") return stored;
+  return framed ? "system" : "dark";
+}
+
 function loadChoice(): ThemeChoice {
+  const framed = isEmbedded() && !inWebview();
   try {
-    const v = localStorage.getItem(KEY);
-    return v === "light" || v === "system" ? v : "dark";
+    return initialChoice(localStorage.getItem(KEY), framed);
   } catch {
-    return "dark";
+    return initialChoice(null, framed);
   }
 }
 
