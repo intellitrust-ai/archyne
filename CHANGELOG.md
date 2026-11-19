@@ -50,6 +50,15 @@ CSS class names and internal store shape are _not_ public API.
   «block»s with parts, values and ports), a state machine of its operating
   modes, and the activity of a mission.
 
+### Changed
+
+- **Embedded, Archyne follows the host's theme.** Without a saved theme choice
+  Archyne started dark, also inside a light host page. In an iframe
+  (`?embed=1`) it now starts from "system": there `prefers-color-scheme` is the
+  framing page's `color-scheme`, so the editor takes the host's theme, light or
+  dark, and changes with it. A saved choice still wins; outside an iframe, and
+  in the VS Code webview, the default stays dark.
+
 ### Fixed
 
 - **A class's annotations are split into words again.** The inspector's
