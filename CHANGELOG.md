@@ -26,6 +26,15 @@ CSS class names and internal store shape are _not_ public API.
 
 ## [Unreleased]
 
+### Changed
+
+- **Embedded, Archyne follows the host's theme.** Without a saved theme choice
+  Archyne started dark, also inside a light host page. In an iframe
+  (`?embed=1`) it now starts from "system": there `prefers-color-scheme` is the
+  framing page's `color-scheme`, so the editor takes the host's theme, light or
+  dark, and changes with it. A saved choice still wins; outside an iframe, and
+  in the VS Code webview, the default stays dark.
+
 ## [1.3.0-alpha.1.intellitrust.2] — 2026-11-18
 
 A release of the `intellitrust-ai/archyne` fork: 1.3.0-alpha.1.intellitrust.1

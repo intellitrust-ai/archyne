@@ -310,6 +310,11 @@ A working example ships at `/embed-demo.html`.
 
 Add `&pan=drag` to make a drag on the empty canvas pan the view, as most
 canvases in host apps do; the selection rectangle is then Shift + drag.
+
+Embedded, Archyne starts from the "system" theme unless the user saved
+another: inside an iframe that is the host page's `color-scheme`, so set
+`color-scheme: light` or `dark` on your page and the editor follows it, also
+when it changes.
 Without it a drag draws the rectangle, and the view pans with the middle or
 right button or with Space held.
 
