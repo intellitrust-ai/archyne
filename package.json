@@ -73,6 +73,7 @@
     "test:e2e:waypoints": "tsx tests/e2e-waypoints.mts",
     "test:e2e:reconnect": "tsx tests/e2e-reconnect.mts",
     "test:e2e:tool": "tsx tests/e2e-tool.mts",
+    "test:e2e:pan": "tsx tests/e2e-pan.mts",
     "test:e2e:sequence": "tsx tests/e2e-sequence.mts",
     "test:e2e:architecture": "tsx tests/e2e-architecture.mts",
     "test:e2e:resize": "tsx tests/e2e-resize.mts",
