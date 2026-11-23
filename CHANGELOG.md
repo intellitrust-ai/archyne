@@ -26,6 +26,13 @@ CSS class names and internal store shape are _not_ public API.
 
 ## [Unreleased]
 
+## [1.5.0-alpha.1.intellitrust.1] — 2026-11-23
+
+A release of the `intellitrust-ai/archyne` fork, not of the upstream project:
+1.5.0-alpha.1 plus the changes below. SysML requirement diagrams, which earlier
+fork releases carried, are now upstream's. Its packages are attached to the
+fork's GitHub release rather than published to npm.
+
 ### Added
 
 - **Drag-to-pan when embedded.** A host that adds `&pan=drag` to the embed URL
